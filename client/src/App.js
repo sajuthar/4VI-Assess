@@ -181,7 +181,7 @@ function App() {
               <th>Rental date</th>
               <th>Return date</th>
               <th>Driver Needed</th>
-              <th>Active</th>
+              <th>Activity</th>
               
             </tr>
           </thead>
