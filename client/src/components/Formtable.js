@@ -37,6 +37,8 @@ const Formtable = ({handleSubmit,handleOnChange,handleclose,rest,validations}) =
 
               <label htmlFor='returndate'>Returndate :</label>
               <input type="date" id="returndate" name="returndate" onChange={handleOnChange} value={rest.returndate}/>
+              {/* {validations.returndate && <span className="error" style={{color:"red"}} >{validations.returndate}</span>}<br></br> */}
+
 
               <label htmlFor='driverneeded'>Driver Needed? :</label>
               <select id="driverneeded" name="driverneeded" onChange={handleOnChange} value={rest.driverneeded} style={{height:"40px"}}>

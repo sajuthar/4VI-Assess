@@ -1,10 +1,13 @@
 import './App.css';
-
 import { useEffect, useState } from 'react';
 import axios from "axios"
 import Formtable from './components/Formtable';
+// import { firestore } from 'firebase-firestore';
+import { app, firestore } from './firebase';
+import { addDoc, collection, getDocs } from 'firebase/firestore'; 
 
-axios.defaults.baseURL = "http://localhost:8000/"
+
+axios.defaults.baseURL = "http://localhost:8080/";
 
 function formatDate(isoDate) {
   const date = new Date(isoDate);
@@ -42,6 +45,7 @@ function App() {
     email: "Invalid email address",
     mobile: "Invalid mobile Number",
     nic: "Invalid NIC Number",
+    // returndate:"Invalid Return date"
     
   };
 
@@ -64,14 +68,30 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("/create", formData);
-      console.log(response.data);
+    const newProduct = {
+      name: formData.name,
+      email: formData.email,
+      mobile: formData.mobile,
+      nic: formData.nic,
+      rentaldate: formData.rentaldate,
+      returndate: formData.returndate,
+      driverneeded: formData.driverneeded,
+    };
+  
+      const response = await axios.post("http://localhost:8080/create", formData);
+      // console.log(response.data);
 
-      if (response.data.success) {
+      try {
+        // Add the new product to the "products" collection in Firebase Firestore
+        const docRef = await addDoc(collection(firestore, 'products'), newProduct);
+    
+        // Display a success message
+        console.log('Document written with fire Doc ID: ', docRef.id);
+    
+        // Clear the form and fetch the updated data
         setAddSection(false);
-        alert(response.data.message);
-        getFetchData();
+        alert('Product added firebase successfully');
+        getFetchData(); // Refresh the data from Firestore
         setFormData({
           name: "",
           nic: "",
@@ -81,7 +101,6 @@ function App() {
           email: "",
           driverneeded: "",
         });
-      }
     } catch (error) {
       // console.log(error.response.data.errors)
       if (error.response && error.response.data && error.response.data.errors) {
@@ -92,19 +111,22 @@ function App() {
         }, {});
         setFormErrors(formErrors);
       }
-      console.error("Error submitting form:")
+      console.error("Error submitting form:",error)
     }
   };
   // console.log(formErrors)
       
   
-  const getFetchData = async()=>{
-    const data = await axios.get("/")
-    // console.log(data)
-    if(data.data.success){
-        setDataList(data.data.data)
+  const getFetchData = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(firestore, 'products'));
+      const data = querySnapshot.docs.map((doc) => ({ ...doc.data(), _id: doc.id }));
+      setDataList(data);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
     }
-  }
+  };
+  
   useEffect(()=>{
     getFetchData()
   },[])
@@ -190,7 +212,7 @@ function App() {
               dataList.map((el)=>{
                 // console.log(el)
                 return(
-                  <tr>
+                  <tr key={el._id}>
                     <td>{el.name}</td>
                     <td>{el.email}</td>
                     <td>{el.mobile}</td>

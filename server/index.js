@@ -2,23 +2,32 @@ const express  = require('express');
 const cors = require('cors')
 const mongoose = require('mongoose')
 const { body, validationResult } = require('express-validator');
+const corsOptions = {
+  origin: 'http://localhost:3000', // Replace with your React app's URL
+};
 
 
 const app = express()
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(express.json())
 
-const PORT  = process.env.PORT || 8000
+const PORT  = process.env.PORT || 8080
 
 function validateMobile(mobile) {
     const mobileRegex =  /^([+]\d{2})?\d{10}$/;
         return mobileRegex.test(mobile);
   }
 
-function validateNic(nic) {
-    const nicRegex =  /^([0-9]{9}[x|X|v|V]|[0-9]{12})$/;
-        return nicRegex.test(nic);
-  }
+// function validateNic(nic) {
+//     const nicRegex =  /^([0-9]{9}[x|X|v|V]|[0-9]{12})$/;
+//         return nicRegex.test(nic);
+//   }
+  
+function validatereturndate(returndate){
+    if (rentaldate<=returndate) {
+       
+    }
+}
 
 //schema
 const schemaData  = mongoose.Schema({
@@ -36,15 +45,16 @@ const schemaData  = mongoose.Schema({
 const userModel  = mongoose.model("user",schemaData)
 
 // read
-// ​ http://localhost:8000/
+// ​ http://localhost:8080/
+
 app.get("/",async(req,res)=>{
     const data = await userModel.find({})
     res.json({success : true , data : data})
 })  
 
 
-//create data || save data in mongodb
-//http://localhost:8000/create
+
+//http://localhost:8080/create
 
 
 app.post(
@@ -59,7 +69,8 @@ app.post(
 
     body("mobile").notEmpty().custom(validateMobile).withMessage("Invalid mobile Number!"),
     
-    body("nic").notEmpty().custom(validateNic).withMessage("Invalid NIC Number!"),
+    // body("nic").notEmpty().custom(validateNic).withMessage("Invalid NIC Number!"),
+    // body("returndate").notEmpty().custom(validatereturndate).withMessage("Return date must be grater than Rental date"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -68,9 +79,11 @@ app.post(
       return res.status(400).json({ success: false, errors: errors.array() });
     }
     //  console.log(req.body);
-    const { year, month, date } = req.body;
+    const { year, month, date, yearReturn, monthReturn, dateReturn } = req.body;
     const rentaldate = new Date(year, month - 1, date);
-    const returndate = new Date(year, month - 1, date);
+    const returndate = new Date(yearReturn, monthReturn - 1, dateReturn);
+    
+
 
     try {
       // Create a new userModel document
@@ -90,7 +103,7 @@ app.post(
 
 
 //update data 
-// http://localhost:8000/update
+// http://localhost:8080/update
 
 
 app.put("/update",[
@@ -101,16 +114,7 @@ app.put("/update",[
     body("mobile").notEmpty()
         .withMessage("Invalid mobile Number"),
     body("name").notEmpty().withMessage("Name is required must"),
-    body("nic").notEmpty().withMessage("Invalid NIC Number"),
-    body("returndate")  // Add custom validation for returndate
-        .custom((value, { req }) => {
-            const rentaldate = new Date(req.body.rentaldate);
-            const returndate = new Date(value);
-            if (returndate <= rentaldate) {
-                throw new Error("Return date must be greater than rental date");
-            }
-            return true;
-        }),
+    body("nic").notEmpty().withMessage("Invalid NIC Number"),      
     
 ],async(req,res)=>{
     const { _id,...rest} = req.body 
@@ -119,7 +123,7 @@ app.put("/update",[
 })
 
 //delete api
-// http://localhost:8000/delete/id
+// http://localhost:8080/delete/id
 app.delete("/delete/:id",async(req,res)=>{
     const id = req.params.id
     console.log(id)
@@ -134,5 +138,5 @@ mongoose.connect("mongodb://127.0.0.1:27017/crudoperation")
     console.log("connect to DB")
     app.listen(PORT,()=>console.log("Server is running"))
 })
-.catch((err)=>console.log(err))
+.catch((err)=>console.log(' local db not connect',err))
 
