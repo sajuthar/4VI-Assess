@@ -23,25 +23,25 @@ const Formtable = ({handleSubmit,handleOnChange,handleclose,rest,validations}) =
               {/* {validations.email && <span className="error" style={{ color: "red" }}>{validations.email}</span>}<br></br> */}
               
 
-              <label htmlFor="mobile">Weight : </label>
+              <label htmlFor="mobile">Weight(g) : </label>
               <input type="number" id="mobile" name="mobile" onChange={handleOnChange} value={rest.mobile}/>
               {/* {validations.mobile && <span className="error" style={{color:"red"}} >{validations.mobile}</span>}<br></br> */}
 
-              <label htmlFor="nic">NIC : </label>
-              <input type="number" id="nic" name="nic" onChange={handleOnChange} value={rest.nic}/>
+              <label htmlFor="price">Price(LKR) : </label>
+              <input type="number" id="price" name="price" onChange={handleOnChange} value={rest.price}/>
               {/* {validations.nic && <span className="error" style={{color:"red"}} >{validations.nic}</span>}<br></br> */}
 
 
-              <label htmlFor='rentaldate'>Rentaldate :</label>
-              <input type="date" id="rentaldate" name="rentaldate" onChange={handleOnChange} value={rest.rentaldate} />
+              <label htmlFor='mnfDate'>Mnf.Date :</label>
+              <input type="date" id="mnfDate" name="mnfDate" onChange={handleOnChange} value={rest.mnfDate} />
 
-              <label htmlFor='returndate'>Returndate :</label>
-              <input type="date" id="returndate" name="returndate" onChange={handleOnChange} value={rest.returndate}/>
+              <label htmlFor='expDate'>Exp.Date :</label>
+              <input type="date" id="expDate" name="expDate" onChange={handleOnChange} value={rest.expDate}/>
               {/* {validations.returndate && <span className="error" style={{color:"red"}} >{validations.returndate}</span>}<br></br> */}
 
 
-              <label htmlFor='driverneeded'>Driver Needed? :</label>
-              <select id="driverneeded" name="driverneeded" onChange={handleOnChange} value={rest.driverneeded} style={{height:"40px"}}>
+              <label htmlFor='stockAvailable'>Stock Avilable? :</label>
+              <select id="stockAvailable" name="stockAvailable" onChange={handleOnChange} value={rest.stockAvailable} style={{height:"40px"}}>
                 <option value= "select">Choose One </option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>

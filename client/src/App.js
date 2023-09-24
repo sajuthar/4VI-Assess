@@ -4,7 +4,7 @@ import axios from "axios"
 import Formtable from './components/Formtable';
 // import { firestore } from 'firebase-firestore';
 import { app, firestore } from './firebase';
-import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { addDoc, collection, getDocs ,deleteDoc,updateDoc,doc} from 'firebase/firestore';
 
 
 axios.defaults.baseURL = "http://localhost:8080/";
@@ -23,29 +23,29 @@ function App() {
   const [editSection, setEditSection] = useState(false)
   const [formData, setFormData] = useState({
     pname: "",
-    nic: "",
-    rentaldate: "",
-    returndate: "",
+    price: "",
+    mnfDate: "",
+    expDate: "",
     mobile: "",
     product_name: "",
-    driverneeded: "",
+    stockAvailable: "",
   })
   const [formDataEdit, setFormDataEdit] = useState({
     pname: "",
-    nic: "",
-    rentaldate: "",
-    returndate: "",
+    price: "",
+    mnfDate: "",
+    expDate: "",
     mobile: "",
     product_name: "",
-    driverneeded: "",
+    stockAvailable: "",
     _id: ""
   })
 
   const errorMessages = {
     product_name: "product_name is not empty",
     mobile: "Not empty",
-    nic: "Invalid NIC Number",
-    // returndate:"Invalid Return date"
+    price: "Invalid price",
+    // exp.date:"Invalid Return date"
 
   };
 
@@ -72,10 +72,10 @@ function App() {
       pname: formData.pname,
       product_name: formData.product_name,
       mobile: formData.mobile,
-      nic: formData.nic,
-      rentaldate: formData.rentaldate,
-      returndate: formData.returndate,
-      driverneeded: formData.driverneeded,
+      price: formData.price,
+      mnfDate: formData.mnfDate,
+      expDate: formData.expDate,
+      stockAvailable: formData.stockAvailable,
     };
     console.log(newProduct);
 
@@ -94,12 +94,12 @@ function App() {
       getFetchData();
       setFormData({
         pname: "",
-        nic: "",
-        rentaldate: "",
-        returndate: "",
+        price: "",
+        mnfDate: "",
+        expDate: "",
         mobile: "",
         product_name: "",
-        driverneeded: "",
+        stockAvailable: "",
       });
     } catch (error) {
       console.log(error.response.data.errors)
@@ -130,31 +130,33 @@ function App() {
   useEffect(() => {
     getFetchData()
   }, [])
-
   const handleDelete = async (id) => {
-    console.log("Delete button clicked");
-    console.log("Before Axios DELETE request");
     try {
-      const data = await axios.delete("/delete/" + id);
-      console.log("After Axios DELETE request");
-      if (data.data.success) {
-        getFetchData();
-        alert(data.data.message);
-      }
+      // Delete the document from the "products" collection in Firebase Firestore
+      await deleteDoc(doc(firestore, 'products', id));
+      alert('Product deleted from Firebase successfully');
+      getFetchData();
     } catch (error) {
-      console.error("Axios DELETE error:", error);
+      console.error("Firebase Firestore DELETE error:", error);
     }
   };
-
+  
   const handleUpdate = async (e) => {
-    e.preventDefault()
-    const data = await axios.put(`/update/${formDataEdit._id}`, formDataEdit)
-    if (data.data.success) {
-      getFetchData()
-      alert(data.data.message)
-      setEditSection(false)
+    e.preventDefault();
+  
+    try {
+      const { _id, ...rest } = formDataEdit;
+  
+      // Update the document in the "products" collection in Firebase Firestore
+      await updateDoc(doc(firestore, 'products', _id), rest);
+  
+      alert('Product updated in Firebase successfully');
+      getFetchData();
+      setEditSection(false);
+    } catch (error) {
+      console.error("Firebase Firestore UPDATE error:", error);
     }
-  }
+  };
   const handleEditOnChange = async (e) => {
     const { value, name } = e.target
     setFormDataEdit((preve) => {
@@ -204,8 +206,8 @@ function App() {
               <tr>
                 <th>Image</th>
                 <th>Product_Name</th>
-                <th>mobile</th>
-                <th>Price</th>
+                <th>Weight(g)</th>
+                <th>Price(LKR)</th>
                 <th>Mnf.Date</th>
                 <th>Exp.Date</th>
                 <th>Stock</th>
@@ -222,10 +224,10 @@ function App() {
                       <td>{el.pname}</td>
                       <td>{el.product_name}</td>
                       <td>{el.mobile}</td>
-                      <td>{el.nic}</td>
-                      <td>{formatDate(el.rentaldate)}</td>
-                      <td>{formatDate(el.returndate)}</td>
-                      <td>{el.driverneeded}</td>
+                      <td>{el.price}</td>
+                      <td>{formatDate(el.mnfDate)}</td>
+                      <td>{formatDate(el.expDate)}</td>
+                      <td>{el.stockAvailable}</td>
                       <td>
                         <button className='btn btn-edit' onClick={() => handleEdit(el)}>Edit</button>
                         <button className='btn btn-delete' onClick={() => handleDelete(el._id)}>Delete</button>
@@ -249,3 +251,4 @@ function App() {
 }
 
 export default App;
+
