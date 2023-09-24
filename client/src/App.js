@@ -2,9 +2,9 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import axios from "axios"
 import Formtable from './components/Formtable';
-// import { firestore } from 'firebase-firestore';
-import { app, firestore } from './firebase';
-import { addDoc, collection, getDocs ,deleteDoc,updateDoc,doc} from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
+import { app, firestore, storage } from './firebase';
+import { addDoc, collection, getDocs, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
 
 axios.defaults.baseURL = "http://localhost:8080/";
@@ -22,20 +22,20 @@ function App() {
   const [addSection, setAddSection] = useState(false)
   const [editSection, setEditSection] = useState(false)
   const [formData, setFormData] = useState({
-    pname: "",
+    image: "",
     price: "",
     mnfDate: "",
     expDate: "",
-    mobile: "",
+    weight: "",
     product_name: "",
     stockAvailable: "",
   })
   const [formDataEdit, setFormDataEdit] = useState({
-    pname: "",
+    image: "",
     price: "",
     mnfDate: "",
     expDate: "",
-    mobile: "",
+    weight: "",
     product_name: "",
     stockAvailable: "",
     _id: ""
@@ -43,13 +43,25 @@ function App() {
 
   const errorMessages = {
     product_name: "product_name is not empty",
-    mobile: "Not empty",
+    weight: "Not empty",
     price: "Invalid price",
     // exp.date:"Invalid Return date"
 
   };
 
   const [dataList, setDataList] = useState([])
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedImage(file);
+    // setFormData((prev) => ({
+    //   ...prev,
+    //   image: file,
+    // }));
+  };
+
+
 
   const handleOnChange = (e) => {
     const { value, name } = e.target
@@ -61,30 +73,35 @@ function App() {
     })
   }
 
-
   const [formErrors, setFormErrors] = useState({});
 
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newProduct = {
-      pname: formData.pname,
-      product_name: formData.product_name,
-      mobile: formData.mobile,
-      price: formData.price,
-      mnfDate: formData.mnfDate,
-      expDate: formData.expDate,
-      stockAvailable: formData.stockAvailable,
-    };
-    console.log(newProduct);
-
-
-    const response = await axios.post("/create", formData);
-    console.log(response.data);
 
     try {
-      // Add the new product to the "products" collection in Firebase Firestore
+      // Upload the selected image to Firebase Storage
+      const imageRef = ref(storage, `images/${selectedImage.name}`);
+      await uploadBytes(imageRef, selectedImage);
+
+      const newProduct = {
+        image: `gs://authentication-ff0ac.appspot.com/images/${selectedImage.image}`,
+        product_name: formData.product_name,
+        weight: formData.weight,
+        price: formData.price,
+        mnfDate: formData.mnfDate,
+        expDate: formData.expDate,
+        stockAvailable: formData.stockAvailable,
+      };
+      console.log(newProduct);
+
+
+      const response = await axios.post("/create", formData);
+      console.log(response.data);
+
+      // try {
+
       const docRef = await addDoc(collection(firestore, 'products'), newProduct);
 
       console.log('Document written with fire Doc ID: ', docRef.id);
@@ -92,17 +109,24 @@ function App() {
       setAddSection(false);
       alert('Product added firebase successfully');
       getFetchData();
+      console.log(response.data);
+      if (response && response.data) {
+        console.log(response.data);
+      } else {
+        console.error('No data in the response.');
+      }
+
       setFormData({
-        pname: "",
+        image: "",
         price: "",
         mnfDate: "",
         expDate: "",
-        mobile: "",
+        weight: "",
         product_name: "",
         stockAvailable: "",
       });
     } catch (error) {
-      console.log(error.response.data.errors)
+      // console.log(error.response.data.errors)
       if (error.response && error.response.data && error.response.data.errors) {
         const formErrors = error.response.data.errors.reduce((acc, error) => {
           acc[error.path] = errorMessages[error.path] || error.msg;
@@ -115,8 +139,6 @@ function App() {
     }
   };
   // console.log(formErrors)
-
-
   const getFetchData = async () => {
     try {
       const querySnapshot = await getDocs(collection(firestore, 'products'));
@@ -140,16 +162,26 @@ function App() {
       console.error("Firebase Firestore DELETE error:", error);
     }
   };
-  
+
   const handleUpdate = async (e) => {
     e.preventDefault();
-  
+
     try {
       const { _id, ...rest } = formDataEdit;
-  
-      // Update the document in the "products" collection in Firebase Firestore
+
+
+      if (selectedImage) {
+
+        const imageRef = ref(storage, `images/${selectedImage.name}`);
+        await uploadBytes(imageRef, selectedImage);
+
+
+        rest.image = `gs://authentication-ff0ac.appspot.com/images/${selectedImage.name}`;
+      }
+
+
       await updateDoc(doc(firestore, 'products', _id), rest);
-  
+
       alert('Product updated in Firebase successfully');
       getFetchData();
       setEditSection(false);
@@ -157,6 +189,7 @@ function App() {
       console.error("Firebase Firestore UPDATE error:", error);
     }
   };
+
   const handleEditOnChange = async (e) => {
     const { value, name } = e.target
     setFormDataEdit((preve) => {
@@ -180,6 +213,7 @@ function App() {
             <Formtable
               handleSubmit={handleSubmit}
               handleOnChange={handleOnChange}
+              handleImageChange={handleImageChange}
               handleclose={() => setAddSection(false)}
               rest={formData}
               validations={formErrors}
@@ -190,6 +224,7 @@ function App() {
           editSection && (
             <Formtable
               handleSubmit={handleUpdate}
+              handleImageChange={handleImageChange}
               handleOnChange={handleEditOnChange}
               handleclose={() => setEditSection(false)}
               rest={formDataEdit}
@@ -218,12 +253,12 @@ function App() {
             <tbody>
               {dataList[0] ? (
                 dataList.map((el) => {
-                  // console.log(el)
+                  console.log(el)
                   return (
                     <tr key={el._id}>
-                      <td>{el.pname}</td>
+                      <td>{el.image}</td>
                       <td>{el.product_name}</td>
-                      <td>{el.mobile}</td>
+                      <td>{el.weight}</td>
                       <td>{el.price}</td>
                       <td>{formatDate(el.mnfDate)}</td>
                       <td>{formatDate(el.expDate)}</td>

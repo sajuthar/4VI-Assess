@@ -1,6 +1,6 @@
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
-import {getStorage} from "firebase/storage";
+import {getStorage,ref,uploadBytes} from "firebase/storage";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 

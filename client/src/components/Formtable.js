@@ -3,7 +3,7 @@ import "../App.css";
 import { MdClose } from 'react-icons/md';
 import "../App"
 
-const Formtable = ({handleSubmit,handleOnChange,handleclose,rest,validations}) => {
+const Formtable = ({handleSubmit,handleOnChange,handleclose,rest,handleImageChange,validations}) => {
   function formatDateForInput(dateString) {
     const [year, month, day] = dateString.split('-'); 
     return `${year}-${month}-${day}`; 
@@ -14,8 +14,8 @@ const Formtable = ({handleSubmit,handleOnChange,handleclose,rest,validations}) =
     <div className="addContainer">
             <form onSubmit={handleSubmit}>
             <div className="close-btn" onClick={handleclose}><MdClose/></div>
-              <label htmlFor="pname">Image : </label>
-              <input type="text" id="pname" name="pname" onChange={handleOnChange} value={rest.pname}/>
+              <label htmlFor="image">Image : </label>
+              <input type="file" id="image" name="image" onChange={handleImageChange}/>
 
 
               <label htmlFor="product_name">Product_Name: </label>
@@ -23,9 +23,9 @@ const Formtable = ({handleSubmit,handleOnChange,handleclose,rest,validations}) =
               {/* {validations.email && <span className="error" style={{ color: "red" }}>{validations.email}</span>}<br></br> */}
               
 
-              <label htmlFor="mobile">Weight(g) : </label>
-              <input type="number" id="mobile" name="mobile" onChange={handleOnChange} value={rest.mobile}/>
-              {/* {validations.mobile && <span className="error" style={{color:"red"}} >{validations.mobile}</span>}<br></br> */}
+              <label htmlFor="weight">Weight(g) : </label>
+              <input type="number" id="weight" name="weight" onChange={handleOnChange} value={rest.weight}/>
+              {/* {validations.weight && <span className="error" style={{color:"red"}} >{validations.weight}</span>}<br></br> */}
 
               <label htmlFor="price">Price(LKR) : </label>
               <input type="number" id="price" name="price" onChange={handleOnChange} value={rest.price}/>
