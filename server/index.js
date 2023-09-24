@@ -16,9 +16,9 @@ const PORT  = process.env.PORT || 8080
 
 //schema
 const schemaData  = mongoose.Schema({
-    pName : String,
+    image:String,
     product_name : String,
-    mobile : Number,
+    weight : Number,
     mnfDate : Date,
     expDate : Date,
     price : Number,
