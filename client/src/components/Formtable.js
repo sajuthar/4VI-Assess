@@ -14,22 +14,22 @@ const Formtable = ({handleSubmit,handleOnChange,handleclose,rest,validations}) =
     <div className="addContainer">
             <form onSubmit={handleSubmit}>
             <div className="close-btn" onClick={handleclose}><MdClose/></div>
-              <label htmlFor="name">Name : </label>
-              <input type="text" id="name" name="name" onChange={handleOnChange} value={rest.name}/>
+              <label htmlFor="pname">Image : </label>
+              <input type="text" id="pname" name="pname" onChange={handleOnChange} value={rest.pname}/>
 
 
-              <label htmlFor="email">Email : </label>
-              <input type="email" id="email" name="email" onChange={handleOnChange} value={rest.email}/>
-              {validations.email && <span className="error" style={{ color: "red" }}>{validations.email}</span>}<br></br>
+              <label htmlFor="product_name">Product_Name: </label>
+              <input type="text" id="product_name" name="product_name" onChange={handleOnChange} value={rest.product_name}/>
+              {/* {validations.email && <span className="error" style={{ color: "red" }}>{validations.email}</span>}<br></br> */}
               
 
-              <label htmlFor="mobile">Mobile : </label>
+              <label htmlFor="mobile">Weight : </label>
               <input type="number" id="mobile" name="mobile" onChange={handleOnChange} value={rest.mobile}/>
-              {validations.mobile && <span className="error" style={{color:"red"}} >{validations.mobile}</span>}<br></br>
+              {/* {validations.mobile && <span className="error" style={{color:"red"}} >{validations.mobile}</span>}<br></br> */}
 
               <label htmlFor="nic">NIC : </label>
               <input type="number" id="nic" name="nic" onChange={handleOnChange} value={rest.nic}/>
-              {validations.nic && <span className="error" style={{color:"red"}} >{validations.nic}</span>}<br></br>
+              {/* {validations.nic && <span className="error" style={{color:"red"}} >{validations.nic}</span>}<br></br> */}
 
 
               <label htmlFor='rentaldate'>Rentaldate :</label>

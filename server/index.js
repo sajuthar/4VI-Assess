@@ -2,10 +2,10 @@ const express  = require('express');
 const cors = require('cors')
 const mongoose = require('mongoose')
 const { body, validationResult } = require('express-validator');
-const corsOptions = {
-  origin: 'http://localhost:3000', // Replace with your React app's URL
-};
 
+const corsOptions = {
+  origin: 'http://localhost:3000', 
+};
 
 const app = express()
 app.use(cors(corsOptions))
@@ -13,27 +13,12 @@ app.use(express.json())
 
 const PORT  = process.env.PORT || 8080
 
-function validateMobile(mobile) {
-    const mobileRegex =  /^([+]\d{2})?\d{10}$/;
-        return mobileRegex.test(mobile);
-  }
-
-// function validateNic(nic) {
-//     const nicRegex =  /^([0-9]{9}[x|X|v|V]|[0-9]{12})$/;
-//         return nicRegex.test(nic);
-//   }
-  
-function validatereturndate(returndate){
-    if (rentaldate<=returndate) {
-       
-    }
-}
 
 //schema
 const schemaData  = mongoose.Schema({
-    name : String,
-    email : String,
-    mobile : String,
+    pName : String,
+    product_name : String,
+    mobile : Number,
     rentaldate : Date,
     returndate : Date,
     nic : Number,
@@ -57,39 +42,34 @@ app.get("/",async(req,res)=>{
 //http://localhost:8080/create
 
 
-app.post(
-  "/create",
-  [
-    body("email")
-    .trim()
-    .isEmail()
-    .notEmpty()
-    .withMessage("Invalid email address !"),
-  body("name").notEmpty().withMessage("Name can not be empy"),
-
-    body("mobile").notEmpty().custom(validateMobile).withMessage("Invalid mobile Number!"),
+app.post("/create" ,async (req, res) => {
+  // const errors = validationResult(req);
     
-    // body("nic").notEmpty().custom(validateNic).withMessage("Invalid NIC Number!"),
-    // body("returndate").notEmpty().custom(validatereturndate).withMessage("Return date must be grater than Rental date"),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    console.log(errors);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({ success: false, errors: errors.array() });
+    //   console.log(errors);
+    // }
     //  console.log(req.body);
-    const { year, month, date, yearReturn, monthReturn, dateReturn } = req.body;
-    const rentaldate = new Date(year, month - 1, date);
-    const returndate = new Date(yearReturn, monthReturn - 1, dateReturn);
-    
-
-
+    // .
     try {
+      // Convert string dates to Date objects
+      const rentalDateObj = new Date(req.body.rentaldate);
+      const returnDateObj = new Date(req.body.returndate);
+  
+      // Check if returndate is greater than or equal to rentaldate
+      if (returnDateObj < rentalDateObj) {
+        return res.status(400).json({
+          success: false,
+          message: "Return date must be greater than or equal to rental date.",
+        });
+      }
+
+
+   
       // Create a new userModel document
       const data = new userModel({
-        rentaldate: rentaldate,
-        returndate: returndate,
+        rentaldate: rentalDateObj,
+        returndate: returnDateObj,
         ...req.body, 
       });
 
@@ -97,6 +77,7 @@ app.post(
       res.json({ success: true, message: "data saved successfully", data: data });
     } catch (error) {
       res.status(500).json({ success: false, message: "An error occurred", error: error.message });
+      console.log(error)
     }
   }
 );
@@ -106,30 +87,40 @@ app.post(
 // http://localhost:8080/update
 
 
-app.put("/update",[
-    body("email").trim()
-      .isEmail()
-      .notEmpty()
-      .withMessage("Invalid email address"),
-    body("mobile").notEmpty()
-        .withMessage("Invalid mobile Number"),
-    body("name").notEmpty().withMessage("Name is required must"),
-    body("nic").notEmpty().withMessage("Invalid NIC Number"),      
-    
-],async(req,res)=>{
-    const { _id,...rest} = req.body 
-    const data = await userModel.findByIdAndUpdate({ _id : _id},rest)
-    res.send({success : true, message : "data update successfully", data : data})
-})
+app.put("/update/:id", async (req, res) => {
+  try {
+    const {id} = req.params;
+    const { ...rest } = req.body;
+    console.log(id);
+    const data = await userModel.findByIdAndUpdate(id, rest, { new: true });
+    if (!data) {
+      return res.status(404).json({ success: false, message: "Data not found" });
+    }
+    return res.status(200).json({ success: true, message: "Data updated successfully", data: data });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "An error occurred" });
+  }
+});
+
 
 //delete api
 // http://localhost:8080/delete/id
-app.delete("/delete/:id",async(req,res)=>{
-    const id = req.params.id
-    console.log(id)
-    const data = await userModel.deleteOne({_id : id})
-    res.send({success : true, message : "data delete successfully", data : data})
-})
+app.delete("/delete/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    // Check if the ID is a valid ObjectId
+   
+    const data = await userModel.deleteOne({ _id: id });
+
+
+    return res.status(200).json({ success: true, message: "Data deleted successfully", data: data });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "An error occurred" });
+  }
+});
 
 
 
