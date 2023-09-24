@@ -19,10 +19,10 @@ const schemaData  = mongoose.Schema({
     pName : String,
     product_name : String,
     mobile : Number,
-    rentaldate : Date,
-    returndate : Date,
-    nic : Number,
-    driverneeded : String,
+    mnfDate : Date,
+    expDate : Date,
+    price : Number,
+    stockAvailable : String,
 },{
     timestamps : true
 })
@@ -53,14 +53,14 @@ app.post("/create" ,async (req, res) => {
     // .
     try {
       // Convert string dates to Date objects
-      const rentalDateObj = new Date(req.body.rentaldate);
-      const returnDateObj = new Date(req.body.returndate);
+      const mnfDateObj = new Date(req.body.mnfdate);
+      const expDateObj = new Date(req.body.expDate);
   
-      // Check if returndate is greater than or equal to rentaldate
-      if (returnDateObj < rentalDateObj) {
+      // Check if exp date is greater than or equal to mnf-date
+      if (expDateObj < mnfDateObj) {
         return res.status(400).json({
           success: false,
-          message: "Return date must be greater than or equal to rental date.",
+          message: "Return date must be greater than or equal to mnf date.",
         });
       }
 
@@ -68,8 +68,8 @@ app.post("/create" ,async (req, res) => {
    
       // Create a new userModel document
       const data = new userModel({
-        rentaldate: rentalDateObj,
-        returndate: returnDateObj,
+        mnfDate: mnfDateObj,
+        expDate: expDateObj,
         ...req.body, 
       });
 
